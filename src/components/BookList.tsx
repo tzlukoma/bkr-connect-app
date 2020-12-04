@@ -1,4 +1,5 @@
 import React from 'react'
+import lunr from 'lunr'
 
 import { firestore } from '../base'
 
@@ -26,7 +27,9 @@ const useStyles = makeStyles(theme => ({
     }
   }
 }))
-
+interface BookListProps {
+  searchTerm: string
+}
 interface Book {
   id: string,
   title: string,
@@ -37,15 +40,45 @@ interface Book {
   regularPrice: string
 }
 
-
-
-const BookList = () => {
+const BookList = ({ searchTerm }: BookListProps) => {
   const classes = useStyles()
 
   const booksRef = firestore.collection('books')
   const query = booksRef.orderBy('createdAt', 'desc')
 
+
   const [books] = useCollectionData<Book>(query, { idField: 'id' })
+
+
+
+  const idx = lunr(function () {
+    try {
+      if (books) {
+        this.field("title")
+        this.field("author")
+        this.field("sku")
+        for (let i = 0; i < books.length; i++) { this.add(books[i]) }
+      } else return null
+    } catch (error) {
+      console.log(error)
+    }
+
+  })
+
+
+  function searchPosts(query: string) {
+    try {
+      const result = idx?.search(query)
+      if (idx && books && result) {
+        return result.map((item) => { return books.find((book) => item.ref === book.id) })
+      }
+    } catch (error) {
+      console.log(error.message)
+    }
+
+  }
+
+  const displayBooks = searchPosts(searchTerm)
 
 
   return (
@@ -53,16 +86,15 @@ const BookList = () => {
       <Grid container style={{ padding: 12 }}>
         <Grid item xs={12}>
           <List>  <Grid container>
-            {books &&
-              books.map(book => {
+            {displayBooks && displayBooks?.length < 1 && <Typography variant="h6">There are no results for your search - type some more or add a new term</Typography>}
+            {displayBooks &&
+              displayBooks.map(book => {
                 return (
-
-
-                  <Grid item xs={12} sm={6} lg={4} key={book.id}>
-                    <ListItem key={book.id} className={classes.listItem}>
+                  <Grid item xs={12} sm={6} lg={4} key={book?.id}>
+                    <ListItem key={book?.id} className={classes.listItem}>
                       <ListItemAvatar >
                         <img
-                          src={book.coverImage}
+                          src={book?.coverImage}
                           alt={`Book cover`}
                           style={{ width: 150, margin: 'auto', height: "auto" }}
                         />
@@ -72,13 +104,13 @@ const BookList = () => {
                           marginLeft: 20
                         }}
                       >
-                        <Typography variant='h6'>{book.title}</Typography>
-                        <Typography variant='body2'>{`by ${book.author}`}</Typography>
-                        <Typography variant='caption'>{book.sku}</Typography>
-                        <Typography variant='h6' style={{ fontWeight: 700 }}>{book.regularPrice}</Typography>
+                        <Typography variant='h6'>{book?.title}</Typography>
+                        <Typography variant='body2'>{`by ${book?.author}`}</Typography>
+                        <Typography variant='caption'>{book?.sku}</Typography>
+                        <Typography variant='h6' style={{ fontWeight: 700 }}>{book?.regularPrice}</Typography>
                         {
-                          book.stockCount > 0 ?
-                            <div style={{ marginTop: 5 }}><Chip label={`${book.stockCount} in stock`} color="secondary" size="small" /></div>
+                          book?.stockCount && book?.stockCount > 0 ?
+                            <div style={{ marginTop: 5 }}><Chip label={`${book?.stockCount} in stock`} color="secondary" size="small" /></div>
                             : <div style={{ marginTop: 5 }}><Chip label={`out of stock`} size="small" /></div>
                         }
                       </ListItemText>
