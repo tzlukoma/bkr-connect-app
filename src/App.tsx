@@ -20,19 +20,23 @@ import BookList from './components/BookList'
 import { ReactComponent as PlusIcon } from './assets/dark-icons/plus-circle.svg'
 import SignInPage from './pages/SignInPage'
 
-const App:React.FC = () => {
+const App: React.FC = () => {
   const [user] = useAuthState(auth)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const signedIn:boolean = !!auth.currentUser
+  const signedIn: boolean = !!auth.currentUser
+  console.log(user)
 
-  // console.log(user, signedIn)
+  const token = localStorage.getItem("token");
 
-  const handleOpen = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>):void => {
+  console.log(`token`, token)
+
+
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     setDialogOpen(true)
   }
 
-  const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>):void =>{
+  const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     setDialogOpen(false)
   }
 
@@ -41,7 +45,7 @@ const App:React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline>
           <AppHeader signedIn={signedIn} user={user} />
-          {signedIn ? (
+          {(token || signedIn) ? (
             <>
               <Container style={{ padding: 20 }}>
                 <Grid
@@ -74,8 +78,8 @@ const App:React.FC = () => {
               </Dialog>
             </>
           ) : (
-            <SignInPage />
-          )}
+              <SignInPage />
+            )}
         </CssBaseline>
       </ThemeProvider>
     </div>
