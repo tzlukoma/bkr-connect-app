@@ -28,7 +28,7 @@ import SignInPage from './pages/SignInPage'
 const App: React.FC = () => {
   const [user] = useAuthState(auth)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState(" ")
+  const [searchTerm, setSearchTerm] = useState("")
 
   const signedIn: boolean = !!auth.currentUser
   console.log(user)

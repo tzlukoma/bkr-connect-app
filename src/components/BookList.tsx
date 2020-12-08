@@ -57,12 +57,15 @@ const BookList = ({ searchTerm }: BookListProps) => {
         this.field("title")
         this.field("author")
         this.field("sku")
+
+        this.pipeline.remove(lunr.stemmer)
+        // this.searchPipeline.remove(lunr.stemmer)
+
         for (let i = 0; i < books.length; i++) { this.add(books[i]) }
       } else return null
     } catch (error) {
       console.log(error)
     }
-
   })
 
 
