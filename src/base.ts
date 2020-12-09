@@ -23,7 +23,7 @@ if (window.location.hostname === 'localhost') {
   )
   firebase.functions().useEmulator('http://localhost:5001',5001)
   firebase.firestore().settings({
-    host: 'localhost:8080',
+    host: 'localhost:8090',
     ssl: false
   })
 }

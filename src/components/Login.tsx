@@ -1,19 +1,31 @@
 import { Button, Container, Grid } from '@material-ui/core'
-import React from 'react'
-
-import { app, auth } from '../base'
+import React, { useState } from 'react'
 
 import Typography from '@material-ui/core/Typography'
+import Alert from '@material-ui/lab/Alert'
 
 import { ReactComponent as BkrScene } from '../assets/bkr-scene.svg'
 import { ReactComponent as GoogleIcon } from '../assets/google-icon.svg'
+import { useAuth } from '../context/AuthContext'
 
-import customStyles from './sign-in-page.module.css'
+import { useHistory } from 'react-router-dom'
 
-const SignInPage = () => {
-  const signInWithGoogle = () => {
-    const provider = new app.auth.GoogleAuthProvider()
-    auth.signInWithPopup(provider)
+
+const Login = () => {
+
+  const { logInWithGoogle } = useAuth()
+  const history = useHistory()
+  const [error, setError] = useState("")
+
+  async function handleLogin() {
+    try {
+      setError("")
+      await logInWithGoogle()
+      history.push("/")
+    } catch (error) {
+      setError("Failed to sign in")
+    }
+
   }
 
   return (
@@ -35,12 +47,14 @@ const SignInPage = () => {
             <Typography variant='h5' style={{ paddingBottom: 20 }}>
               Manage everything about<br></br> Brown Kids Read
             </Typography>
-            <Button variant='outlined' size='large' onClick={signInWithGoogle}>
+            <Button variant='outlined' size='large' onClick={handleLogin}>
               <GoogleIcon style={{ height: 15, width: 15, marginRight: 15 }} /> <Typography variant='body1'>
                 Sign In With
                 Google
               </Typography>
             </Button>
+
+            {error && <Alert variant="outlined" severity="error">{error}</Alert>}
           </Grid>
           <Grid item xs={12}></Grid>
         </Grid>
@@ -49,4 +63,4 @@ const SignInPage = () => {
   )
 }
 
-export default SignInPage
+export default Login
