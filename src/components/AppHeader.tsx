@@ -1,15 +1,18 @@
-import React from 'react'
-
-import { auth } from '../base'
+import React, { useState } from 'react'
+import { useHistory } from "react-router-dom"
 
 import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import Button from '@material-ui/core/Button'
+import Alert from '@material-ui/lab/Alert'
+
+import { useAuth } from '../context/AuthContext'
 
 import { ReactComponent as BookIcon } from '../assets/book.svg'
 import { ReactComponent as SignOutIcon } from '../assets/dark-icons/logout.svg'
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -24,16 +27,29 @@ const useStyles = makeStyles(theme => ({
 }))
 
 type AppHeaderProps = {
-  signedIn:boolean,
-  user:object
+  signedIn: boolean,
+  user: object
 }
 
-const AppHeader = ({ signedIn, user }:AppHeaderProps) => {
+const AppHeader = ({ signedIn, user }: AppHeaderProps) => {
   const classes = useStyles()
+  const { currentUser, logout } = useAuth()
+  const history = useHistory()
+  const [error, setError] = useState<string>()
 
-  function SignOut () {
+  async function handleLogout() {
+    setError("")
+    try {
+      await logout()
+      history.push("/login")
+    } catch (error) {
+      setError("Could not log out")
+    }
+  }
+
+  function SignOut() {
     return (
-      <Button variant='outlined' onClick={() => auth.signOut()}>
+      <Button variant='outlined' onClick={() => handleLogout()}>
         <SignOutIcon style={{ marginRight: 10, width: 20 }} />
         <Typography variant='h6'>Sign Out</Typography>
       </Button>
@@ -48,7 +64,8 @@ const AppHeader = ({ signedIn, user }:AppHeaderProps) => {
           <Typography variant='h6' className={classes.title}>
             BKR CONNECT
           </Typography>
-          {auth.currentUser && <SignOut />}
+          {error && <Alert variant="outlined" severity="error">{error}</Alert>}
+          {currentUser && <SignOut />}
         </Toolbar>
       </AppBar>
     </div>

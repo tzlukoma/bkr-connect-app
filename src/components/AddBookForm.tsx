@@ -185,13 +185,16 @@ const AddBookForm = ({ isDialogOpen }: AddBookFormProps) => {
 
 
     const booksRef = firestore.collection('books').doc(submitData['sku'])
+    try {
+      await booksRef.set({
+        ...submitData,
+        createdAt: app.firestore.FieldValue.serverTimestamp()
+      })
 
-    await booksRef.set({
-      ...submitData,
-      createdAt: app.firestore.FieldValue.serverTimestamp()
-    })
-
-    await bookStatsRef.update({ booksCount: increment })
+      await bookStatsRef.update({ booksCount: increment })
+    } catch (error) {
+      console.log(error)
+    }
 
     console.log(submitData)
     isDialogOpen(false)
